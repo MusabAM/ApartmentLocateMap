@@ -9,7 +9,7 @@ function App() {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" component="div">
-            Apartment Finder
+            Svastha Connect Map App
           </Typography>
         </Toolbar>
       </AppBar>
