@@ -13,6 +13,9 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
 });
 
+// Use environment variable for backend URL
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 const RefreshButton = ({ fetchApartments }) => {
   const map = useMap();
 
@@ -52,7 +55,7 @@ const MapPage = () => {
     setLoading(true);
     setError(null);
     try {
-      let url = 'http://localhost:5000/api/apartments';
+      let url = `${API_BASE}/api/apartments`;
       if (bounds) {
         url += `?north=${bounds.north}&south=${bounds.south}&east=${bounds.east}&west=${bounds.west}`;
       }
