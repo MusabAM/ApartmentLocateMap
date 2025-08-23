@@ -62,3 +62,29 @@ app.get("/api/apartments", async (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
+
+// API endpoint to fetch apartments
+app.get("/api/apartments", async (req, res) => {
+  try {
+    const { north, south, east, west } = req.query;
+    const query = {};
+
+    if (north && south && east && west) {
+      query.Latitude = { $gte: parseFloat(south), $lte: parseFloat(north) };
+      query.Longitude = { $gte: parseFloat(west), $lte: parseFloat(east) };
+    }
+
+    // Fetch apartments with a limit of 100
+    const apartments = await Apartment.find(query).limit(100);
+
+    // Debug: print first 5 apartments to the console
+    console.log("First 5 Apartments:", apartments.slice(0, 5));
+
+    // Send response
+    res.json(apartments);
+  } catch (error) {
+    console.error("Error fetching apartments:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
