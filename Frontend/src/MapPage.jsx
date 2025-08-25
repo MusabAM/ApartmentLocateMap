@@ -14,7 +14,7 @@ L.Icon.Default.mergeOptions({
 });
 
 // Use environment variable for backend URL
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_BASE = process.env.REACT_APP_API_URL || "https://apartment-backend-yrhi.onrender.com";
 
 const RefreshButton = ({ fetchApartments }) => {
   const map = useMap();
