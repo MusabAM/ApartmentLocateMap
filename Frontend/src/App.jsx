@@ -16,7 +16,7 @@ const Header = () => {
           onClick={() => navigate('/')} 
           sx={{ flexGrow: 1, cursor: 'pointer' }}
         >
-          Apartment Finder
+          Svastha Connect Map App
         </Typography>
         <Button color="inherit" onClick={() => navigate('/')}>
           Map
