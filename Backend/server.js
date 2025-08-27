@@ -40,21 +40,45 @@ const apartmentSchema = new mongoose.Schema({
 
 const Apartment = mongoose.model("Apartment", apartmentSchema, "apartment");
 
-// API endpoint to fetch apartments
+// API endpoint to get apartments based on map bounds and price range
 app.get("/api/apartments", async (req, res) => {
   try {
-    const { north, south, east, west } = req.query;
+    const { north, south, east, west, minPrice, maxPrice } = req.query;
     const query = {};
 
+    // Filter by map bounds
     if (north && south && east && west) {
       query.Latitude = { $gte: parseFloat(south), $lte: parseFloat(north) };
       query.Longitude = { $gte: parseFloat(west), $lte: parseFloat(east) };
     }
     
+    // Filter by price range
+    if (minPrice !== undefined && maxPrice !== undefined) {
+      query["Minimum Price"] = { $gte: parseFloat(minPrice) };
+      query["Maximum Price"] = { $lte: parseFloat(maxPrice) };
+    }
+
     const apartments = await Apartment.find(query).limit(100);
     res.json(apartments);
   } catch (error) {
     console.error("Error fetching apartments:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+// New API endpoint to fetch a single apartment by its ID
+app.get("/api/apartments/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const apartment = await Apartment.findById(id);
+
+    if (!apartment) {
+      return res.status(404).json({ error: "Apartment not found" });
+    }
+
+    res.json(apartment);
+  } catch (error) {
+    console.error("Error fetching single apartment:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
@@ -62,29 +86,3 @@ app.get("/api/apartments", async (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
-
-// API endpoint to fetch apartments
-app.get("/api/apartments", async (req, res) => {
-  try {
-    const { north, south, east, west } = req.query;
-    const query = {};
-
-    if (north && south && east && west) {
-      query.Latitude = { $gte: parseFloat(south), $lte: parseFloat(north) };
-      query.Longitude = { $gte: parseFloat(west), $lte: parseFloat(east) };
-    }
-
-    // Fetch apartments with a limit of 100
-    const apartments = await Apartment.find(query).limit(100);
-
-    // Debug: print first 5 apartments to the console
-    console.log("First 5 Apartments:", apartments.slice(0, 5));
-
-    // Send response
-    res.json(apartments);
-  } catch (error) {
-    console.error("Error fetching apartments:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
