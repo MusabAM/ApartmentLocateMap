@@ -133,7 +133,7 @@ const MapPage = () => {
       
       {/* Aesthetic loading and error messages */}
       {loading && (
-        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1001, bgcolor: 'background.paper', p: 2, borderRadius: 1, boxShadow: 3 }}>
+        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1001, bgcolor: 'background.paper', p: 2, borderRadius: 1, boxShadow: 3, color: 'text.secondary'}}>
           <Typography>Loading apartment data...</Typography>
         </Box>
       )}
