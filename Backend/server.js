@@ -44,26 +44,36 @@ const Apartment = mongoose.model("Apartment", apartmentSchema, "apartment");
 app.get("/api/apartments", async (req, res) => {
   try {
     const { north, south, east, west, minPrice, maxPrice, amenities } = req.query;
-    const query = {};
+    
+    const filterConditions = [];
 
+    // Filter by map bounds
     if (north && south && east && west) {
-      query.Latitude = { $gte: parseFloat(south), $lte: parseFloat(north) };
-      query.Longitude = { $gte: parseFloat(west), $lte: parseFloat(east) };
+      filterConditions.push({
+        Latitude: { $gte: parseFloat(south), $lte: parseFloat(north) },
+        Longitude: { $gte: parseFloat(west), $lte: parseFloat(east) },
+      });
     }
     
+    // Filter by price range (more robust overlap logic)
     if (minPrice !== undefined && maxPrice !== undefined) {
-      query.$or = [
-        { "Minimum Price": { $gte: parseFloat(minPrice), $lte: parseFloat(maxPrice) } },
-        { "Maximum Price": { $gte: parseFloat(minPrice), $lte: parseFloat(maxPrice) } },
-        { "Minimum Price": { $lte: parseFloat(minPrice) }, "Maximum Price": { $gte: parseFloat(maxPrice) } }
-      ];
+      filterConditions.push({
+        $or: [
+          { "Minimum Price": { $gte: parseFloat(minPrice), $lte: parseFloat(maxPrice) } },
+          { "Maximum Price": { $gte: parseFloat(minPrice), $lte: parseFloat(maxPrice) } },
+          { "Minimum Price": { $lte: parseFloat(minPrice) }, "Maximum Price": { $gte: parseFloat(maxPrice) } }
+        ]
+      });
     }
 
+    // Filter by amenities
     if (amenities) {
       const amenitiesArray = amenities.split(',').map(amenity => amenity.trim());
-      query.Amenities = { $all: amenitiesArray };
+      filterConditions.push({ Amenities: { $all: amenitiesArray } });
     }
 
+    // Build the final query using $and to combine all conditions
+    const query = filterConditions.length > 0 ? { $and: filterConditions } : {};
     const apartments = await Apartment.find(query).limit(100);
     res.json(apartments);
   } catch (error) {
