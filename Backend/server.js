@@ -40,14 +40,15 @@ const apartmentSchema = new mongoose.Schema({
 
 const Apartment = mongoose.model("Apartment", apartmentSchema, "apartment");
 
-
+// API endpoint to get apartments with all filters
 app.get("/api/apartments", async (req, res) => {
   try {
     const { north, south, east, west, minPrice, maxPrice, amenities } = req.query;
     
+    // NEW: We collect all independent filter requirements here.
     const filterConditions = [];
 
-    // Filter by map bounds
+    // 1. Filter by map bounds
     if (north && south && east && west) {
       filterConditions.push({
         Latitude: { $gte: parseFloat(south), $lte: parseFloat(north) },
@@ -55,7 +56,7 @@ app.get("/api/apartments", async (req, res) => {
       });
     }
     
-    // Filter by price range (more robust overlap logic)
+    // 2. Filter by price range (Robust Overlap Logic)
     if (minPrice !== undefined && maxPrice !== undefined) {
       filterConditions.push({
         $or: [
@@ -66,15 +67,16 @@ app.get("/api/apartments", async (req, res) => {
       });
     }
 
-    // Filter by amenities
+    // 3. Filter by amenities (The $all requirement)
     if (amenities) {
       const amenitiesArray = amenities.split(',').map(amenity => amenity.trim());
       filterConditions.push({ Amenities: { $all: amenitiesArray } });
     }
 
-    // Build the final query using $and to combine all conditions
-    const query = filterConditions.length > 0 ? { $and: filterConditions } : {};
-    const apartments = await Apartment.find(query).limit(100);
+    // Build the final query: $and ensures ALL collected conditions are met.
+    const finalQuery = filterConditions.length > 0 ? { $and: filterConditions } : {};
+    
+    const apartments = await Apartment.find(finalQuery).limit(100);
     res.json(apartments);
   } catch (error) {
     console.error("Error fetching apartments:", error);
